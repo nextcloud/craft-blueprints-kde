@@ -53,6 +53,9 @@ class subinfo(info.infoclass):
         self.patchLevel["6.8.0"] = 2
         self.patchLevel["6.8.1"] = 2
 
+        # https://bugreports.qt.io/browse/QTBUG-134075 (fixed in 6.9.1)
+        self.patchToApply["6.9.0"] += [("5ed1dcd1cc3adf26c591eefc161495a4c313d15d.diff", 1)]
+
     def setDependencies(self):
         self.runtimeDependencies["virtual/base"] = None
         self.buildDependencies["dev-utils/pkgconf"] = None
@@ -129,6 +132,8 @@ class Package(CraftPackageObject.get("libs/qt6").pattern):
             self.subinfo.options.configure.args += [f"-DANDROID_ABI={CraftCore.compiler.androidAbi}", "-DECM_THREADS_WORKAROUND=OFF"]
         elif CraftCore.compiler.isMacOS:
             self.subinfo.options.configure.args += ["-DQT_NO_HANDLE_APPLE_SINGLE_ARCH_CROSS_COMPILING=ON"]
+        elif CraftCore.compiler.isWindows:
+            self.subinfo.options.configure.args += ["-DQT_WIN_SERVER_2016_COMPAT=ON"]
 
     def configure(self):
         if CraftCore.compiler.isAndroid:
