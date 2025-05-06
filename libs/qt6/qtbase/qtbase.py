@@ -133,7 +133,7 @@ class Package(CraftPackageObject.get("libs/qt6").pattern):
         elif CraftCore.compiler.isMacOS:
             self.subinfo.options.configure.args += ["-DQT_NO_HANDLE_APPLE_SINGLE_ARCH_CROSS_COMPILING=ON"]
         elif CraftCore.compiler.isWindows:
-            self.subinfo.options.configure.args += ["-DQT_WIN_SERVER_2016_COMPAT=ON"]
+            self.subinfo.options.configure.args += ["-DQT_EXTRA_DEFINES=QT_WIN_SERVER_2016_COMPAT"]
 
     def configure(self):
         if CraftCore.compiler.isAndroid:
