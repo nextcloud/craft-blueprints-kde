@@ -53,7 +53,8 @@ class subinfo(info.infoclass):
         self.patchLevel["6.8.0"] = 2
         self.patchLevel["6.8.1"] = 2
 
-        # https://bugreports.qt.io/browse/QTBUG-134075 (fixed in 6.9.1)
+        # https://bugreports.qt.io/browse/QTBUG-134075 (fixed in 6.8.4 and 6.9.1)
+        self.patchToApply["6.8.3"] += [("9484b6e5b78308c3245d4c67b43fe58d09e28c1d.diff", 1)]
         self.patchToApply["6.9.0"] += [("5ed1dcd1cc3adf26c591eefc161495a4c313d15d.diff", 1)]
 
     def setDependencies(self):
