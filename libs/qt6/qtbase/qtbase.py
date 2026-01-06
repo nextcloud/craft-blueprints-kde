@@ -122,6 +122,7 @@ class Package(CraftPackageObject.get("libs/qt6").pattern):
             self.subinfo.options.configure.args += [
                 f"-DFEATURE_cups={self.subinfo.options.dynamic.withCUPS.asOnOff}",
                 "-DFEATURE_xcb=ON",
+                "-DFEATURE_xkbcommon_x11=ON",
                 f"-DQT_FEATURE_egl={self.subinfo.options.dynamic.withEgl.asOnOff}",
             ]
 
