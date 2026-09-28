@@ -45,7 +45,8 @@ class subinfo(info.infoclass):
         self.patchToApply["6.8.0"] += [("qt680-fix-infinite-icu-loop.diff", 1)]
 
         # https://qt-project.atlassian.net/browse/QTBUG-150017
-        self.patchToApply["6.10.2"] += [("774ebf5.diff", 1)]
+        # https://codereview.qt-project.org/c/qt/qtbase/+/775577
+        self.patchToApply["6.10.2"] += [("774ebf5.diff", 1), ("qtbase-hsts-expired-policy.diff", 1)]
 
         # https://bugreports.qt.io/browse/QTBUG-132410 (fixed in 6.8.2)
         if CraftCore.compiler.isAndroid:
@@ -57,7 +58,7 @@ class subinfo(info.infoclass):
         self.patchLevel["6.6.1"] = 3
         self.patchLevel["6.8.0"] = 2
         self.patchLevel["6.8.1"] = 2
-        self.patchLevel["6.10.2"] = 1
+        self.patchLevel["6.10.2"] = 2
 
     def setDependencies(self):
         self.runtimeDependencies["virtual/base"] = None
