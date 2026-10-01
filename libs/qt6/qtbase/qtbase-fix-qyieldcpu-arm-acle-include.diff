@@ -1,0 +1,14 @@
+diff --git a/src/corelib/thread/qyieldcpu.h b/src/corelib/thread/qyieldcpu.h
+--- a/src/corelib/thread/qyieldcpu.h
++++ b/src/corelib/thread/qyieldcpu.h
+@@ -9,6 +9,10 @@
+ #include <QtCore/qcompilerdetection.h>
+ #include <QtCore/qprocessordetection.h>
+ #include <QtCore/qtconfigmacros.h>
++
++#if defined(Q_PROCESSOR_ARM) && __has_builtin(__yield)
++#  include <arm_acle.h>
++#endif
+
+ #ifdef Q_CC_MSVC_ONLY
+ // MSVC defines _YIELD_PROCESSOR() in <xatomic.h>, but as that is a private
