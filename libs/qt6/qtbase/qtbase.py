@@ -49,7 +49,8 @@ class subinfo(info.infoclass):
         # Fix build failure with recent Apple Clang: __yield() is used without including
         # <arm_acle.h>, which newer Clang treats as an implicit-function-declaration error.
         # Fixed upstream for Qt 6.11.1/6.12, backported here for 6.10.2.
-        self.patchToApply["6.10.2"] += [("774ebf5.diff", 1), ("qtbase-hsts-expired-policy.diff", 1), ("qtbase-fix-qyieldcpu-arm-acle-include.diff", 1)]
+        if CraftCore.compiler.isMacOS:
+            self.patchToApply["6.10.2"] += [("774ebf5.diff", 1), ("qtbase-hsts-expired-policy.diff", 1), ("qtbase-fix-qyieldcpu-arm-acle-include.diff", 1)]
 
         # https://bugreports.qt.io/browse/QTBUG-132410 (fixed in 6.8.2)
         if CraftCore.compiler.isAndroid:
@@ -61,7 +62,8 @@ class subinfo(info.infoclass):
         self.patchLevel["6.6.1"] = 3
         self.patchLevel["6.8.0"] = 2
         self.patchLevel["6.8.1"] = 2
-        self.patchLevel["6.10.2"] = 3
+        if CraftCore.compiler.isMacOS:
+            self.patchLevel["6.10.2"] = 1
 
     def setDependencies(self):
         self.runtimeDependencies["virtual/base"] = None
