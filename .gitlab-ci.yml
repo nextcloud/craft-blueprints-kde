@@ -81,6 +81,8 @@ run-tests:
     - "echo blueprintRoot: $blueprintRoot"
     - ln -s $CI_PROJECT_DIR $blueprintRoot/craft-blueprints-kde
     - python3 craft/bin/test/runtests.py --blueprint-root $blueprintRoot
+    - mv JUnitTestResults.xml JUnitCraftResults.xml
+    - PYTHONPATH="$CI_PROJECT_DIR/.tests" python3 craft/bin/test/runtests.py --blueprint-root "$blueprintRoot" -t test_brotli
   artifacts:
     reports:
       junit: JUnit*Results.xml
