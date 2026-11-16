@@ -47,6 +47,8 @@ class subinfo(info.infoclass):
 
         # https://qt-project.atlassian.net/browse/QTBUG-150017
         self.patchToApply["6.11.2"] += [("774ebf5.diff", 1), ("qtbase-hsts-expired-policy.diff", 1)]
+        # Stage SBOM output and checksum inputs consistently with CMake on Windows.
+        self.patchToApply["6.11.2"] += [("qtbase-sbom-windows-staging.diff", 1)]
 
         # https://bugreports.qt.io/browse/QTBUG-132410 (fixed in 6.8.2)
         if CraftCore.compiler.isAndroid:
@@ -60,7 +62,7 @@ class subinfo(info.infoclass):
         self.patchLevel["6.8.1"] = 2
         self.patchLevel["6.11.0"] = 1
         self.patchLevel["6.11.1"] = 2
-        self.patchLevel["6.11.2"] = 2
+        self.patchLevel["6.11.2"] = 3
 
     def setDependencies(self):
         self.runtimeDependencies["virtual/base"] = None
