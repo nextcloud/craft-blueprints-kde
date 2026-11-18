@@ -55,6 +55,9 @@ class subinfo(info.infoclass):
         self.patchToApply["6.11.1"] += [(".6.11.1", 1)]
         self.patchToApply["6.11.2"] += [(".6.11.1", 1)]
 
+        # Stage SBOM output and checksum inputs consistently with CMake on Windows.
+        self.patchToApply["6.11.2"] += [("qtbase-sbom-windows-staging.diff", 1)]
+
         self.patchLevel["6.4.3"] = 4
         self.patchLevel["6.6.0"] = 4
         self.patchLevel["6.6.1"] = 3
@@ -62,6 +65,7 @@ class subinfo(info.infoclass):
         self.patchLevel["6.8.1"] = 2
         self.patchLevel["6.11.0"] = 1
         self.patchLevel["6.11.1"] = 3
+        self.patchLevel["6.11.2"] = 3
 
     def setDependencies(self):
         self.runtimeDependencies["virtual/base"] = None

@@ -1,0 +1,128 @@
+--- a/cmake/QtPublicSbomCommonGenerationHelpers.cmake
++++ b/cmake/QtPublicSbomCommonGenerationHelpers.cmake
+@@ -9,6 +9,28 @@
+ # that can be overridden by a different file depending on the inclusion order of the
+ # cmake files, and thus pointing to a different dir.
+ set_property(GLOBAL PROPERTY __qt_sbom_generation_helpers_base_dir "${CMAKE_CURRENT_LIST_DIR}")
++
++# Generate install-time path handling, shared by document output and checksum lookup.
++# CMake stages drive-qualified Windows prefixes without the drive letter. DESTDIR must
++# be evaluated at install time, and direct installs must retain their drive letter.
++function(_qt_internal_sbom_get_staged_path_code out_var path_var install_path)
++    set(code "
++        set(${path_var} \"${install_path}\")
++        if(WIN32)
++            string(REPLACE \"\\\\\" \"/\" ${path_var} \"\${${path_var}}\")
++        endif()
++        if(NOT \"\$ENV{DESTDIR}\" STREQUAL \"\")
++            if(WIN32)
++                string(REGEX REPLACE \"^[A-Za-z]:\" \"\" ${path_var} \"\${${path_var}}\")
++            endif()
++            set(${path_var} \"\$ENV{DESTDIR}\${${path_var}}\")
++            if(WIN32)
++                string(REPLACE \"\\\\\" \"/\" ${path_var} \"\${${path_var}}\")
++            endif()
++        endif()
++")
++    set(${out_var} "${code}" PARENT_SCOPE)
++endfunction()
+ 
+ # Helper function to get common project related variables for SBOM generation for both SPDX and
+ # CycloneDX formats.
+@@ -763,15 +785,22 @@
+         _qt_internal_get_staging_area_cydx_file_path(staging_area_file)
+     endif()
+ 
++    _qt_internal_sbom_get_staged_path_code(output_dir_code QT_SBOM_OUTPUT_DIR
++        "${arg_SBOM_INSTALL_OUTPUT_DIR}")
++    _qt_internal_sbom_get_staged_path_code(output_path_code QT_SBOM_OUTPUT_PATH
++        "${arg_SBOM_INSTALL_OUTPUT_PATH}")
++    _qt_internal_sbom_get_staged_path_code(output_without_ext_code QT_SBOM_OUTPUT_PATH_WITHOUT_EXT
++        "${arg_SBOM_INSTALL_OUTPUT_PATH_WITHOUT_EXT}")
++
+     set(assemble_sbom_install "
+         set(QT_SBOM_INSTALLED_ALL_CONFIGS${suffix} TRUE)
+         ${arg_EXTRA_CODE_BEGIN}
+         if(QT_SBOM_INSTALLED_ALL_CONFIGS${suffix})
+             set(QT_SBOM_BUILD_TIME FALSE)
+-            set(QT_SBOM_OUTPUT_DIR \"${arg_SBOM_INSTALL_OUTPUT_DIR}\")
+-            set(QT_SBOM_OUTPUT_PATH \"${arg_SBOM_INSTALL_OUTPUT_PATH}\")
+-            set(QT_SBOM_OUTPUT_PATH_WITHOUT_EXT \"${arg_SBOM_INSTALL_OUTPUT_PATH_WITHOUT_EXT}\")
+-            file(MAKE_DIRECTORY \"${arg_SBOM_INSTALL_OUTPUT_DIR}\")
++            ${output_dir_code}
++            ${output_path_code}
++            ${output_without_ext_code}
++            file(MAKE_DIRECTORY \"\${QT_SBOM_OUTPUT_DIR}\")
+             include(\"${arg_ASSEMBLE_SBOM_INCLUDE_PATH}\")
+             ${arg_BEFORE_CHECKSUM_INCLUDES}
+             ${process_verification_codes}
+--- a/cmake/QtPublicSbomExternalReferenceHelpers.cmake
++++ b/cmake/QtPublicSbomExternalReferenceHelpers.cmake
+@@ -580,7 +580,7 @@
+     # The variable is escaped, so it is evaluated during cmake install time, so that the value
+     # can be overridden with cmake --install . --prefix <path>.
+     if(arg_SEARCH_IN_DESTDIR_INSTALL_PREFIX_AT_INSTALL_TIME)
+-        list(APPEND search_paths "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}")
++        list(APPEND search_paths "\${staged_external_prefix}")
+     endif()
+ 
+     if(arg_EXTERNAL_DOCUMENT_SEARCH_PATHS)
+--- a/cmake/QtPublicSbomGenerationHelpers.cmake
++++ b/cmake/QtPublicSbomGenerationHelpers.cmake
+@@ -510,19 +510,23 @@
+         set(install_prefix "\${CMAKE_INSTALL_PREFIX}")
+     endif()
+ 
++    _qt_internal_sbom_get_staged_path_code(file_path_code staged_file_path
++        "${install_prefix}/${arg_FILENAME}")
++
+     set(content "
+-        if(NOT EXISTS \"\$ENV{DESTDIR}${install_prefix}/${arg_FILENAME}\"
++        ${file_path_code}
++        if(NOT EXISTS \"\${staged_file_path}\"
+                 AND NOT QT_SBOM_BUILD_TIME AND NOT QT_SBOM_FAKE_CHECKSUM)
+             if(NOT ${arg_OPTIONAL})
+                 message(FATAL_ERROR \"Cannot find '${arg_FILENAME}' to compute its checksum. \"
+-                    \"Expected to find it at '\$ENV{DESTDIR}${install_prefix}/${arg_FILENAME}' \")
++                    \"Expected to find it at '\${staged_file_path}' \")
+             endif()
+         else()
+             if(NOT QT_SBOM_BUILD_TIME)
+                 if(QT_SBOM_FAKE_CHECKSUM)
+                     set(sha1 \"158942a783ee1095eafacaffd93de73edeadbeef\")
+                 else()
+-                    file(SHA1 \"\$ENV{DESTDIR}${install_prefix}/${arg_FILENAME}\" sha1)
++                    file(SHA1 \"\${staged_file_path}\" sha1)
+                 endif()
+ 
+                 set(\"QT_SBOM_PACKAGE_HAS_FILES_${arg_PARENT_PACKAGE_SPDXID}\" true)
+@@ -709,8 +713,12 @@
+ ")
+     endif()
+ 
++    _qt_internal_sbom_get_staged_path_code(external_prefix_code staged_external_prefix
++        "\${CMAKE_INSTALL_PREFIX}")
++
+     # File path may not exist yet, and it could be a generator expression.
+     set(content "
++        ${external_prefix_code}
+         set(find_external_document \"${find_external_document}\")
+         set(document_search_paths \"${document_search_paths}\")
+         set(maybe_external_document_file_path \"${arg_EXTERNAL_DOCUMENT_FILE_PATH}\")
+--- a/cmake/QtPublicSbomHelpers.cmake
++++ b/cmake/QtPublicSbomHelpers.cmake
+@@ -301,11 +301,11 @@
+     _qt_internal_path_join(repo_spdx_relative_install_path_cydx_json
+         "${install_sbom_dir}" "${repo_project_file_name_cydx_without_ext}.json")
+ 
+-    # Prepend DESTDIR, to allow relocating installed sbom. Needed for CI.
++    # DESTDIR is applied by the generated install code, including Windows drive handling.
+     _qt_internal_path_join(repo_spdx_install_path_spdx
+-        "\$ENV{DESTDIR}${install_prefix}" "${repo_spdx_relative_install_path_spdx}")
++        "${install_prefix}" "${repo_spdx_relative_install_path_spdx}")
+     _qt_internal_path_join(repo_spdx_install_path_cydx
+-        "\$ENV{DESTDIR}${install_prefix}" "${repo_spdx_relative_install_path_cydx}")
++        "${install_prefix}" "${repo_spdx_relative_install_path_cydx}")
+ 
+     if(arg_LICENSE_EXPRESSION)
+         set(repo_license "${arg_LICENSE_EXPRESSION}")
