@@ -9,7 +9,7 @@ class subinfo(info.infoclass):
         self.parent.package.categoryInfo.platforms = ~CraftCore.compiler.Platforms.Android
 
     def setTargets(self):
-        for v in ["3.6.2", "3.5.1", "3.7.9", "3.8.1"]:
+        for v in ["3.6.2", "3.5.1", "3.7.9", "3.8.1", "3.8.11"]:
             self.targets[v] = f"https://github.com/libarchive/libarchive/archive/v{v}.tar.gz"
             self.targetInstSrc[v] = "libarchive-" + v
 
@@ -17,9 +17,10 @@ class subinfo(info.infoclass):
         self.targetDigests["3.6.2"] = (["652b84588488c2ff38db8f666cd7f781163f85bff4449dcb2e16d3c734f96697"], CraftHash.HashAlgorithm.SHA256)
         self.targetDigests["3.7.9"] = (["6191ea9756a7a0b116d701f3bce30ee3dc8c1f0a16b1e6221d273c85b57ce8c6"], CraftHash.HashAlgorithm.SHA256)
         self.targetDigests["3.8.1"] = (["ad5dfe0d9a5999494c445b9bc3271d84160950bb1790cf892fb132f563d036b6"], CraftHash.HashAlgorithm.SHA256)
+        self.targetDigests["3.8.11"] = (["900fe9fc7237c2b04f090f3c3648de8fe597525771f5035016537ce2d667d12b"], CraftHash.HashAlgorithm.SHA256)
         self.description = "C library and command-line tools for reading and writing tar, cpio, zip, ISO, and other archive formats"
         self.webpage = "https://github.com/libarchive/libarchive"
-        self.defaultTarget = "3.8.1"
+        self.defaultTarget = "3.8.11"
 
     def setDependencies(self):
         self.runtimeDependencies["libs/liblzma"] = None
