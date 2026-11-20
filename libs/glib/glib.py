@@ -11,7 +11,7 @@ class subinfo(info.infoclass):
         self.options.dynamic.setDefault("buildTests", False)
 
     def setTargets(self):
-        for ver in ["2.79.0", "2.81.0", "2.86.0"]:
+        for ver in ["2.79.0", "2.81.0", "2.86.0", "2.90.1"]:
             majorMinorStr = ".".join(ver.split(".")[0:2])
             self.targets[ver] = f"https://download.gnome.org/sources/glib/{majorMinorStr}/glib-{ver}.tar.xz"
             self.targetInstSrc[ver] = f"glib-{ver}"
@@ -19,8 +19,10 @@ class subinfo(info.infoclass):
         self.targetDigests["2.81.0"] = (["1665188ed9cc941c0a189dc6295e6859872523d1bfc84a5a84732a7ae87b02e4"], CraftHash.HashAlgorithm.SHA256)
         self.targetDigests["2.86.0"] = (["b5739972d737cfb0d6fd1e7f163dfe650e2e03740bb3b8d408e4d1faea580d6d"], CraftHash.HashAlgorithm.SHA256)
 
+        self.targetDigests["2.90.1"] = (["93c941aa17d5eb1d53fe838365f29a8b4e539c222a256d974ec8f30fc413e396"], CraftHash.HashAlgorithm.SHA256)
+
         self.patchLevel["2.86.0"] = 1
-        self.defaultTarget = "2.86.0"
+        self.defaultTarget = "2.90.1"
 
     def setDependencies(self):
         self.buildDependencies["virtual/base"] = None
