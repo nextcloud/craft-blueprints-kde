@@ -6,15 +6,17 @@ from Utils import CraftHash
 
 class subinfo(info.infoclass):
     def setTargets(self):
-        for ver in ["11.2.0"]:
-            self.targets[ver] = f"https://github.com/harfbuzz/harfbuzz/archive/{ver}.tar.gz"
-            self.targetInstSrc[ver] = f"harfbuzz-{ver}"
-            if CraftCore.compiler.isAndroid:
-                self.patchToApply[ver] = [("no-so-version.patch", 1)]
-            self.patchLevel[ver] = 2
+        self.targets["11.2.0"] = "https://github.com/harfbuzz/harfbuzz/archive/11.2.0.tar.gz"
+        self.targetInstSrc["11.2.0"] = "harfbuzz-11.2.0"
+        if CraftCore.compiler.isAndroid:
+            self.patchToApply["11.2.0"] = [("no-so-version.patch", 1)]
+        self.patchLevel["11.2.0"] = 2
+        self.targets["15.2.0"] = "https://github.com/harfbuzz/harfbuzz/releases/download/15.2.0/harfbuzz-15.2.0.tar.xz"
+        self.targetInstSrc["15.2.0"] = "harfbuzz-15.2.0"
         self.targetDigests["11.2.0"] = (["16c0204704f3ebeed057aba100fe7db18d71035505cb10e595ea33d346457fc8"], CraftHash.HashAlgorithm.SHA256)
+        self.targetDigests["15.2.0"] = (["e2ec49090744383cdbe7df808c1cedaafba06a97be8dc4211fe546ba585f12cb"], CraftHash.HashAlgorithm.SHA256)
         self.description = "Text shaping library"
-        self.defaultTarget = "11.2.0"
+        self.defaultTarget = "15.2.0"
 
     def setDependencies(self):
         self.runtimeDependencies["virtual/base"] = None
