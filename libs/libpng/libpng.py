@@ -24,7 +24,7 @@ class subinfo(info.infoclass):
                     # disable broken symlink creation
                     self.patchToApply[ver] += [("libpng-1.6.43-20240730.diff", 1)]
 
-        if CraftCore.compiler.isWindows or CraftCore.compiler.isAndroid:
+        if CraftCore.compiler.platform.isWindows or CraftCore.compiler.platform.isAndroid:
             self.patchToApply["1.6.59"] = [
                 ("libpng-1.6.59-install.pc-on-windows.diff", 1),
                 ("libpng-android-remove-zlib-dependency.diff", 1),
